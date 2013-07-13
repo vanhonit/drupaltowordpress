@@ -1,0 +1,10 @@
+{
+    "wpPrefix":"wp_",
+    "drPrefix":"",
+    "dbName":"your database name",
+    "dbUsername":"your database user name",
+    "dbPassword":"your database password",
+    "host":"localhost",
+    "copyFrom":"path copy image file from",
+    "copyTo":"path to wordpress wp-content/"
+}
