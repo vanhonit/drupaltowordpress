@@ -1,16 +1,13 @@
 /*
  *
  *
- * Simple Drupal 6 to Wordpress 3 migrating class for the modeling-languages.com portal
+ * Simple Drupal 6 to Wordpress 3
  *
  *
- * @version 0.1 10 June 2011
- * @author Jordi Cabot
+ * @version 1.0
+ * @author Hon Nguyen
  *
  *
- * Software licensed under Creative Commons Attribution Non-Commercial 3.0 License
- *
- * If you are not familiar with this license please read the full details here: http://creativecommons.org/licenses/by-nc/3.0/
  *
  *
  */
@@ -66,9 +63,9 @@ public class DrupalToWordpress {
 		//Creating the category taxonomy
 		createCategories(dbConnect,wpPrefix,drPrefix);
 		System.out.println("====================== Categories created ====================");
-		
+
 		//Creating tags
-		
+
 		createTags();
 		createImagesTags();
 		System.out.println("====================== Tags created ====================");
@@ -83,7 +80,7 @@ public class DrupalToWordpress {
 		createUser(dbConnect, wpPrefix, drPrefix);
 		//createFile(dbConnect, wpPrefix, drPrefix);
 		//createGallery(dbConnect, wpPrefix, drPrefix);
-		//moveFiles();	  
+		//moveFiles();
 		//Connection to the database (we assume both drupal and wordpress tables are in the same database)
 	  } catch (Exception e) {System.err.println(e.getClass()+ "  " + e.getMessage());System.exit(-1);}
 	}
@@ -104,21 +101,21 @@ public class DrupalToWordpress {
 	        JSONObject jsonObject =  (JSONObject) obj;
 
 	        wpPrefix = (String) jsonObject.get("wpPrefix");
-	        drPrefix = (String) jsonObject.get("drPrefix");	        
-	        dbName = (String) jsonObject.get("dbName");	        
-	        dbPassword = (String) jsonObject.get("dbPassword");	        
-	        dbUserName = (String) jsonObject.get("dbUsername");	        
-	        host = (String) jsonObject.get("host");	        
-	        dir = (String) jsonObject.get("copyFrom");	        
+	        drPrefix = (String) jsonObject.get("drPrefix");
+	        dbName = (String) jsonObject.get("dbName");
+	        dbPassword = (String) jsonObject.get("dbPassword");
+	        dbUserName = (String) jsonObject.get("dbUsername");
+	        host = (String) jsonObject.get("host");
+	        dir = (String) jsonObject.get("copyFrom");
 	        ngg_dir = (String) jsonObject.get("copyTo");
-	       
+
 
 	    } catch (FileNotFoundException e) {
 	        e.printStackTrace();
 	    } catch (IOException e) {
 	        e.printStackTrace();
 	    }
-	     
+
 	}
 	//Truncating the data from wordpress tables
 	static void deleteWPData(Connection dbConnect, String wpPrefix) throws SQLException
@@ -133,7 +130,7 @@ public class DrupalToWordpress {
 		truncateTable(dbConnect, wpPrefix+"ngg_gallery");
 		truncateTable(dbConnect, wpPrefix+"ngg_pictures");
 		truncateTable(dbConnect, wpPrefix+"ngg_album");
-		
+
 		//We also delete all users except for the first one (the site administrator)
 		removeWPUsers(dbConnect,wpPrefix);
 	}
@@ -231,15 +228,15 @@ public class DrupalToWordpress {
 	      stmtUpdateTax.executeUpdate(sqlUpdateTax);
 		  }catch(SQLException e){e.printStackTrace();}
 	      System.out.println("Tag hierarchy " + tidTax + "-" + parentTax+ " created" );
-		}		
+		}
 		stmtTax.close();
 		stmtUpdateTax.close();
 	}
 	static void createImagesTags() throws SQLException
-	{		
+	{
 		Statement stmtTax = dbConnect.createStatement();
 	    String sqlQueryTax = "SELECT term_id, description, parent FROM " + wpPrefix +"term_taxonomy  WHERE taxonomy='post_tag'" ;
-		ResultSet resultSetTax = stmtTax.executeQuery(sqlQueryTax);		
+		ResultSet resultSetTax = stmtTax.executeQuery(sqlQueryTax);
 		String descriptionTax; int tid, parentTax;
 		Statement stmtUpdateTax = dbConnect.createStatement();
 		String sqlInsert = "INSERT INTO " + wpPrefix +"term_taxonomy (term_id, taxonomy, description, parent) value (?, ?, ?, ?)";
@@ -254,11 +251,11 @@ public class DrupalToWordpress {
 		  insertStatement.setString(3, descriptionTax);
 		  insertStatement.setInt(4, parentTax);
 		  //We use as id of the taxonomy the same id as the term. This assumption is used afterwards
-		  //when assigning posts to categories!!		  
+		  //when assigning posts to categories!!
 		  try{
 	      insertStatement.executeUpdate();
-		  }catch(SQLException e){e.printStackTrace();}	      
-		}		
+		  }catch(SQLException e){e.printStackTrace();}
+		}
 		stmtTax.close();
 		stmtUpdateTax.close();
 	}
@@ -267,7 +264,7 @@ public class DrupalToWordpress {
 		String sqlQuery = "SELECT DISTINCT "+
 				"u.uid, u.mail, u.name, u.mail, "+
 				"FROM_UNIXTIME(created) created "+
-				"FROM "+ drPrefix+ "users u "+				
+				"FROM "+ drPrefix+ "users u "+
 				"WHERE (1)";
 		ResultSet resultSet = stmt.executeQuery(sqlQuery);
 		String sqlUpdate="INSERT INTO "+ wpPrefix + "users (ID, user_login, user_pass, user_nicename, user_email, "+
@@ -278,12 +275,12 @@ public class DrupalToWordpress {
 		pass = "$P$BXlquCE24NijM7DGg.XwPNG.TdqCPW.";
 		int uid;
 		while (resultSet.next())
-		{	
+		{
 			uid = resultSet.getInt("uid");
 			user_mail = resultSet.getString("mail");
 			user_name = resultSet.getString("name");
 			user_login = user_name.replace(" ", "_").toLowerCase();
-			user_registerd = resultSet.getString("created");			
+			user_registerd = resultSet.getString("created");
 			stmtUpdate.setInt(1, uid);
 			stmtUpdate.setString(2, user_login);
 			stmtUpdate.setString(3, pass);
@@ -296,9 +293,9 @@ public class DrupalToWordpress {
 			try{
 			stmtUpdate.executeUpdate();
 			}catch(Exception e){e.printStackTrace();};
-			
+
 		}
-		
+
 	}
 	static void createFile(Connection dbConnect, String wpPrefix, String drPrefix) throws SQLException
     {
@@ -312,11 +309,11 @@ public class DrupalToWordpress {
 		PreparedStatement stmtUpdate = dbConnect.prepareStatement(sqlUpdate);
 		String sqlInsertPostmeta = "INSERT INTO " + wpPrefix+"postmeta (post_id, meta_key, meta_value) VALUES (?,?,?)";
 		PreparedStatement stmtPostMeta = dbConnect.prepareStatement(sqlInsertPostmeta);
-		Statement stmtMaxPostID = dbConnect.createStatement();	    
+		Statement stmtMaxPostID = dbConnect.createStatement();
 		int uid, post_id;
 		String post_date,  post_title, post_type_mime;
 		while (resultSet.next())
-		{			
+		{
     	   uid = resultSet.getInt("uid");
     	   post_date = resultSet.getString("postdate");
     	   post_type_mime = resultSet.getString("filemime");
@@ -341,7 +338,7 @@ public class DrupalToWordpress {
     	   //System.out.println(sqlUpdate);
     	   try{
     		   stmtUpdate.executeUpdate();
-    	   }catch(Exception e){    	
+    	   }catch(Exception e){
     		   e.printStackTrace();
     	   }
     	   String sqlQueryMax = "SELECT max(ID) ID FROM "+ wpPrefix+"posts";
@@ -390,7 +387,7 @@ public class DrupalToWordpress {
 				insertPictureStatement.setString(4, alttext);
 				insertPictureStatement.setString(5, imagedateString);
 				try{
-					insertPictureStatement.executeUpdate();	
+					insertPictureStatement.executeUpdate();
 					String getTid = "SELECT term_taxonomy_id FROM " + wpPrefix +"term_taxonomy WHERE term_id = SELECT tid FROM "+ drPrefix + "term_node WHERE nid = "+nid;
 				}catch(Exception e){e.printStackTrace();}
 				//System.out.println(filename);
@@ -399,7 +396,7 @@ public class DrupalToWordpress {
 				filethumb = filethumb+".thumbnail."+filename.substring(filename.lastIndexOf(".")+1,filename.length());
 				cutFile(filename, dir, ngg_dir+"_"+uid);
 				cutFile(filethumb, dir, ngg_dir+"_"+ uid +"/thumbs");
-			}	
+			}
 		}
 	}
 	/*static void moveFiles(){
@@ -412,7 +409,7 @@ public class DrupalToWordpress {
 				if (name.indexOf("thumbnail") > 0) {cutFile(name, dir, ngg_dir+"/thumbs");}
 				if (name.indexOf("thumbnail") <= 0 && name.indexOf("preview") <= 0){cutFile(name, dir, ngg_dir);}
 			}
-		}		
+		}
 	}*/
 	static Boolean checkFiles(String wpPrefix,  String filename) throws SQLException{
 		Boolean results = true;
@@ -426,22 +423,22 @@ public class DrupalToWordpress {
 	static void cutFile(String filename, String from, String to){
 		CopyOption[] option = new CopyOption[] {
 			StandardCopyOption.REPLACE_EXISTING
-		};		
+		};
 		File pathFrom = new File(from+"/"+filename);
 		String newname = filename;
 		if (newname.indexOf("thumbnail") > 0)
 			{
-			newname = filename.replace(".thumbnail", "");			
+			newname = filename.replace(".thumbnail", "");
 			newname = "thumbs_"+newname;
 			}
-		File pathTo = new File(to+"/"+newname);		
+		File pathTo = new File(to+"/"+newname);
 		if (!pathTo.getParentFile().exists()) pathTo.mkdirs();
 		try {
-			Files.copy(pathFrom.toPath(),pathTo.toPath(), option[0]);		
+			Files.copy(pathFrom.toPath(),pathTo.toPath(), option[0]);
 			if (checkFiles(wpPrefix, filename)) pathFrom.deleteOnExit();
 		} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();			
+				e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -452,7 +449,7 @@ public class DrupalToWordpress {
     {
     	//Forum post are ignored in this method. All posts were created by the same admin user (if not you'll need to
     	//migrate drupal users, not done here
-    	
+
 		Statement stmt = dbConnect.createStatement();
 	    String sqlQuery = "SELECT n.nid, n.uid, FROM_UNIXTIME(n.created) created, FROM_UNIXTIME(n.changed) modified, n.TYPE, " +
 	    		"n.status, n.title, r.teaser, r.body, u.dst url " +
@@ -471,7 +468,7 @@ public class DrupalToWordpress {
  	   PreparedStatement stmtUpdate = dbConnect.prepareStatement(sqlUpdate);
  	   int i = 0;
 		while (resultSet.next())
-		{			
+		{
     	   nid=resultSet.getInt("nid");
     	   uid=resultSet.getInt("uid");
     	   status=resultSet.getInt("status");
@@ -491,7 +488,7 @@ public class DrupalToWordpress {
     	   //else
     	   if (title.equals("Impressum") || title.equals("About") || title.equals("Impressum / About")) strType = "page";
     	   else strType="post"; //forum posts and normal posts are both stored as posts
-    	   
+
     	   //To identify forum posts (since we are not migrating them as a separate concept) we prefix the title
     	   if (type.equals("forum")) title="USER FORUM TOPIC " + title;
 
@@ -502,7 +499,7 @@ public class DrupalToWordpress {
 
     	   //We now update the internal links to the images in the site
     	   body=body.replaceAll("/sites/default/files/", "wp-content/uploads/");
-    	    	   
+
     	   stmtUpdate.setInt(1,nid);
     	   stmtUpdate.setInt(2,uid);
     	   stmtUpdate.setString(3,created);
@@ -524,7 +521,7 @@ public class DrupalToWordpress {
     	   try{
     	   stmtUpdate.executeUpdate();
     	   }catch(Exception e){}
-    	   //System.out.println("Post " + title +" created" );    	   
+    	   //System.out.println("Post " + title +" created" );
     	   //resultSet.next();
 
 		}
@@ -537,7 +534,7 @@ public class DrupalToWordpress {
 				" SELECT t.nid,t.tid FROM " +drPrefix + "term_node t, " + drPrefix + "node n "+
 				"WHERE t.nid=n.nid and n.type='blog'";
 		stmtPostsCat.executeUpdate(sqlInsertCat);
-		
+
 		//Insert Tags
 		//Statement stmtPostTagsStatement = dbConnect.createStatement();
 		//String sqlInsertTags="INSERT INTO "+wpPrefix+"term_relationships (object_id,term_taxonomy_id)" +
@@ -575,7 +572,7 @@ public class DrupalToWordpress {
     		}catch(SQLException e){e.printStackTrace();}
     		//ResultSet generatedKeys = insertTags.getGeneratedKeys();
 		    //if (generatedKeys.next()) tid = generatedKeys.getInt(1);
-    		//String sqlInsertRelation = "INSERT INTO " + wpPrefix + "term_t" 
+    		//String sqlInsertRelation = "INSERT INTO " + wpPrefix + "term_t"
 		    insertTerm.setInt(1, tid);
 		    insertTerm.setString(2, "post_tag");
 		    insertTerm.setString(3, "");
@@ -642,7 +639,7 @@ public class DrupalToWordpress {
 						"WHERE c.comment_post_id=p.id)";
 		stmtCommentPosts.executeUpdate(sqlUpdateCount);
     }
-    
+
 
     //Truncate the given table
 	static void truncateTable(Connection dbConnect, String name) throws SQLException
