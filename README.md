@@ -5,6 +5,7 @@ Tools convert drupal  to wordpress
 * Support drupal 6.x and wordpress 3.x
 
 - Required: mysql-connector-java, json-simple
+
 ==
 
 - First thing you must install wordpress to same database with drupal 6.x
